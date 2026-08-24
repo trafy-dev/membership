@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent, type ChangeEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { getProfile, updateProfile, updateProfilePicture, downloadIdCard, changePassword, logout } from '../lib/api'
+import { getProfile, updateProfile, updateProfilePicture, downloadIdCard, changePassword, logout, getImageUrl } from '../lib/api'
 import logo from '../assets/logo.jpg'
 
 interface MemberProfile {
@@ -205,7 +205,7 @@ export default function Dashboard() {
           <div className="member-card-preview">
             <div className="member-avatar-wrapper">
               <img
-                src={profile.profile_picture || '/placeholder.png'}
+                src={getImageUrl(profile.profile_picture) || '/placeholder.png'}
                 alt={profile.name}
                 className="member-avatar"
               />
@@ -424,7 +424,7 @@ export default function Dashboard() {
                   {picPreview ? (
                     <img src={picPreview} alt="Preview" className="image-preview" />
                   ) : profile.profile_picture ? (
-                    <img src={profile.profile_picture} alt="Current" className="image-preview" />
+                    <img src={getImageUrl(profile.profile_picture)} alt="Current" className="image-preview" />
                   ) : (
                     <div className="file-upload-placeholder">
                       <span className="file-upload-icon">📷</span>

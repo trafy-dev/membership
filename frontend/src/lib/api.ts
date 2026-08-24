@@ -1,4 +1,18 @@
-const API_BASE = (import.meta.env.VITE_API_URL as string) || '/api';
+// Normalize API Base URL so it always points to /api regardless of trailing slashes or user inputs
+const rawUrl = (import.meta.env.VITE_API_URL as string) || '/api';
+const trimmed = rawUrl.trim().replace(/\/+$/, '');
+const API_BASE = trimmed.endsWith('/api')
+  ? trimmed
+  : trimmed === ''
+  ? '/api'
+  : `${trimmed}/api`;
+
+export function getImageUrl(imagePath?: string | null): string {
+  if (!imagePath) return '';
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+  const baseUrl = (import.meta.env.VITE_API_URL as string || '').trim().replace(/\/api\/?$/, '').replace(/\/+$/, '');
+  return baseUrl ? `${baseUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}` : imagePath;
+}
 
 // ── Auth ──
 
