@@ -12,9 +12,9 @@ if (!fs.existsSync(uploadsDir)) {
     console.log('[SERVER] Created uploads directory');
 }
 
-// Initialize database (creates DB + runs schema)
-const { getDatabase } = require('./db/database');
-getDatabase();
+// Initialize Supabase Database
+const { supabase } = require('./db/supabase');
+console.log('[SERVER] Using Supabase Database');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -110,7 +110,7 @@ app.listen(PORT, () => {
 ╔══════════════════════════════════════════════╗
 ║  Membership API Server                       ║
 ║  Running on: http://localhost:${PORT}           ║
-║  Database:   SQLite (membership.db)          ║
+║  Database:   Supabase (PostgreSQL)           ║
 ╚══════════════════════════════════════════════╝
     `);
 });

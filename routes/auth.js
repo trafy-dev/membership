@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
 const path = require('path');
-const { getDatabase, generateMemberId } = require('../db/database');
+const { supabase, generateMemberId } = require('../db/supabase');
 
 const router = express.Router();
 
@@ -35,7 +35,7 @@ const upload = multer({
 
 // ============================================================
 // POST /api/auth/signup
-// Register a new member with profile picture upload
+// Register a new member and store in Supabase
 // ============================================================
 router.post('/signup', upload.single('profile_picture'), async (req, res) => {
     try {
@@ -80,11 +80,18 @@ router.post('/signup', upload.single('profile_picture'), async (req, res) => {
             });
         }
 
-        const db = getDatabase();
+        // Check if email already exists in Supabase
+        const { data: existingUser, error: checkError } = await supabase
+            .from('members')
+            .select('id')
+            .eq('email', email)
+            .maybeSingle();
 
-        // Check if email already exists
-        const existing = db.prepare('SELECT id FROM members WHERE email = ?').get(email);
-        if (existing) {
+        if (checkError) {
+            console.error('[SUPABASE] Check error:', checkError.message);
+        }
+
+        if (existingUser) {
             return res.status(409).json({
                 success: false,
                 message: 'An account with this email already exists.'
@@ -95,41 +102,52 @@ router.post('/signup', upload.single('profile_picture'), async (req, res) => {
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        // Generate member ID
-        const memberId = generateMemberId();
+        // Generate member ID from Supabase
+        const memberId = await generateMemberId();
 
-        // Profile picture path (relative for serving)
+        // Profile picture path
         const profilePicture = `/uploads/${req.file.filename}`;
 
-        // Insert into database
-        const stmt = db.prepare(`
-            INSERT INTO members (
-                member_id, name, father_name, email, password,
-                address, district, state, contact_number, blood_group,
-                profession, is_student, course, year, institution_name,
-                city, profile_picture, disclaimer_accepted
-            ) VALUES (
-                ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?,
-                ?, ?, ?
-            )
-        `);
+        // Insert into Supabase
+        const { data: newMember, error: insertError } = await supabase
+            .from('members')
+            .insert([{
+                member_id: memberId,
+                name: name.trim(),
+                father_name: father_name.trim(),
+                email: email.trim().toLowerCase(),
+                password: hashedPassword,
+                address: address || null,
+                district: district || null,
+                state: state || null,
+                contact_number: contact_number || null,
+                blood_group: blood_group || null,
+                profession: profession || null,
+                is_student: is_student === 'true' || is_student === '1' || is_student === true,
+                course: course || null,
+                year: year || null,
+                institution_name: institution_name || null,
+                city: city || null,
+                profile_picture: profilePicture,
+                disclaimer_accepted: true
+            }])
+            .select()
+            .single();
 
-        const result = stmt.run(
-            memberId, name, father_name, email, hashedPassword,
-            address || null, district || null, state || null, contact_number || null, blood_group || null,
-            profession || null, is_student === 'true' || is_student === '1' ? 1 : 0,
-            course || null, year || null, institution_name || null,
-            city || null, profilePicture, 1
-        );
+        if (insertError) {
+            console.error('[SUPABASE] Insert error:', insertError.message);
+            return res.status(500).json({
+                success: false,
+                message: `Database error: ${insertError.message}`
+            });
+        }
 
         // Create session
         req.session.memberId = memberId;
-        req.session.memberDbId = result.lastInsertRowid;
+        req.session.memberDbId = newMember.id;
         req.session.memberName = name;
 
-        console.log(`[AUTH] New member registered: ${memberId} (${name})`);
+        console.log(`[AUTH] New member saved in Supabase: ${memberId} (${name})`);
 
         res.status(201).json({
             success: true,
@@ -138,13 +156,12 @@ router.post('/signup', upload.single('profile_picture'), async (req, res) => {
                 member_id: memberId,
                 name,
                 email,
-                redirect: '/api/member/profile'
+                redirect: '/dashboard'
             }
         });
     } catch (error) {
         console.error('[AUTH] Signup error:', error);
 
-        // Handle multer errors
         if (error instanceof multer.MulterError) {
             if (error.code === 'LIMIT_FILE_SIZE') {
                 return res.status(400).json({
@@ -163,7 +180,7 @@ router.post('/signup', upload.single('profile_picture'), async (req, res) => {
 
 // ============================================================
 // POST /api/auth/login
-// Login with email and password
+// Login with email and password using Supabase
 // ============================================================
 router.post('/login', async (req, res) => {
     try {
@@ -176,8 +193,16 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        const db = getDatabase();
-        const member = db.prepare('SELECT * FROM members WHERE email = ?').get(email);
+        // Query member from Supabase
+        const { data: member, error: findError } = await supabase
+            .from('members')
+            .select('*')
+            .eq('email', email.trim().toLowerCase())
+            .maybeSingle();
+
+        if (findError) {
+            console.error('[SUPABASE] Login query error:', findError.message);
+        }
 
         if (!member) {
             return res.status(401).json({
@@ -199,7 +224,7 @@ router.post('/login', async (req, res) => {
         req.session.memberDbId = member.id;
         req.session.memberName = member.name;
 
-        console.log(`[AUTH] Member logged in: ${member.member_id} (${member.name})`);
+        console.log(`[AUTH] Member logged in from Supabase: ${member.member_id} (${member.name})`);
 
         res.json({
             success: true,
@@ -208,7 +233,7 @@ router.post('/login', async (req, res) => {
                 member_id: member.member_id,
                 name: member.name,
                 email: member.email,
-                redirect: '/api/member/profile'
+                redirect: '/dashboard'
             }
         });
     } catch (error) {

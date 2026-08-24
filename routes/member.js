@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
 const path = require('path');
-const { getDatabase } = require('../db/database');
+const { supabase } = require('../db/supabase');
 const { requireAuth } = require('../middleware/auth');
 const { generateIdCard } = require('../utils/generateIdCard');
 
@@ -38,23 +38,24 @@ const upload = multer({
 
 // ============================================================
 // GET /api/member/profile
-// Get the logged-in member's full profile (dashboard data)
+// Get the logged-in member's full profile from Supabase
 // ============================================================
-router.get('/profile', (req, res) => {
+router.get('/profile', async (req, res) => {
     try {
-        const db = getDatabase();
-        const member = db.prepare(
-            'SELECT * FROM members WHERE member_id = ?'
-        ).get(req.session.memberId);
+        const { data: member, error } = await supabase
+            .from('members')
+            .select('*')
+            .eq('member_id', req.session.memberId)
+            .maybeSingle();
 
-        if (!member) {
+        if (error || !member) {
             return res.status(404).json({
                 success: false,
-                message: 'Member not found.'
+                message: 'Member not found in Supabase.'
             });
         }
 
-        // Remove password from response
+        // Remove password hash from response
         const { password, ...profile } = member;
 
         res.json({
@@ -81,7 +82,6 @@ router.get('/profile', (req, res) => {
                         city: member.city
                     },
                     event_registration: {
-                        // Placeholder — can be expanded when events feature is built
                         registered_events: [],
                         message: 'No events registered yet.'
                     },
@@ -93,16 +93,16 @@ router.get('/profile', (req, res) => {
         console.error('[MEMBER] Profile fetch error:', error);
         res.status(500).json({
             success: false,
-            message: 'Error fetching profile.'
+            message: 'Error fetching profile from Supabase.'
         });
     }
 });
 
 // ============================================================
 // PUT /api/member/profile
-// Update profile information
+// Update profile information in Supabase
 // ============================================================
-router.put('/profile', (req, res) => {
+router.put('/profile', async (req, res) => {
     try {
         const {
             name, father_name, address, district, state,
@@ -110,36 +110,35 @@ router.put('/profile', (req, res) => {
             is_student, course, year, institution_name, city
         } = req.body;
 
-        const db = getDatabase();
+        const updatePayload = {};
+        if (name !== undefined) updatePayload.name = name;
+        if (father_name !== undefined) updatePayload.father_name = father_name;
+        if (address !== undefined) updatePayload.address = address;
+        if (district !== undefined) updatePayload.district = district;
+        if (state !== undefined) updatePayload.state = state;
+        if (contact_number !== undefined) updatePayload.contact_number = contact_number;
+        if (blood_group !== undefined) updatePayload.blood_group = blood_group;
+        if (profession !== undefined) updatePayload.profession = profession;
+        if (is_student !== undefined) updatePayload.is_student = is_student === 'true' || is_student === '1' || is_student === true;
+        if (course !== undefined) updatePayload.course = course;
+        if (year !== undefined) updatePayload.year = year;
+        if (institution_name !== undefined) updatePayload.institution_name = institution_name;
+        if (city !== undefined) updatePayload.city = city;
 
-        const stmt = db.prepare(`
-            UPDATE members SET
-                name = COALESCE(?, name),
-                father_name = COALESCE(?, father_name),
-                address = COALESCE(?, address),
-                district = COALESCE(?, district),
-                state = COALESCE(?, state),
-                contact_number = COALESCE(?, contact_number),
-                blood_group = COALESCE(?, blood_group),
-                profession = COALESCE(?, profession),
-                is_student = COALESCE(?, is_student),
-                course = COALESCE(?, course),
-                year = COALESCE(?, year),
-                institution_name = COALESCE(?, institution_name),
-                city = COALESCE(?, city)
-            WHERE member_id = ?
-        `);
+        const { error } = await supabase
+            .from('members')
+            .update(updatePayload)
+            .eq('member_id', req.session.memberId);
 
-        stmt.run(
-            name || null, father_name || null, address || null,
-            district || null, state || null, contact_number || null,
-            blood_group || null, profession || null,
-            is_student !== undefined ? (is_student === 'true' || is_student === '1' ? 1 : 0) : null,
-            course || null, year || null, institution_name || null,
-            city || null, req.session.memberId
-        );
+        if (error) {
+            console.error('[MEMBER] Supabase update error:', error.message);
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to update profile in database.'
+            });
+        }
 
-        console.log(`[MEMBER] Profile updated: ${req.session.memberId}`);
+        console.log(`[MEMBER] Profile updated in Supabase: ${req.session.memberId}`);
 
         res.json({
             success: true,
@@ -156,9 +155,9 @@ router.put('/profile', (req, res) => {
 
 // ============================================================
 // PUT /api/member/profile-picture
-// Update profile picture
+// Update profile picture in Supabase
 // ============================================================
-router.put('/profile-picture', upload.single('profile_picture'), (req, res) => {
+router.put('/profile-picture', upload.single('profile_picture'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({
@@ -168,13 +167,21 @@ router.put('/profile-picture', upload.single('profile_picture'), (req, res) => {
         }
 
         const profilePicture = `/uploads/${req.file.filename}`;
-        const db = getDatabase();
 
-        db.prepare(
-            'UPDATE members SET profile_picture = ? WHERE member_id = ?'
-        ).run(profilePicture, req.session.memberId);
+        const { error } = await supabase
+            .from('members')
+            .update({ profile_picture: profilePicture })
+            .eq('member_id', req.session.memberId);
 
-        console.log(`[MEMBER] Profile picture updated: ${req.session.memberId}`);
+        if (error) {
+            console.error('[MEMBER] Supabase photo update error:', error.message);
+            return res.status(500).json({
+                success: false,
+                message: 'Error updating photo in database.'
+            });
+        }
+
+        console.log(`[MEMBER] Profile picture updated in Supabase: ${req.session.memberId}`);
 
         res.json({
             success: true,
@@ -194,14 +201,15 @@ router.put('/profile-picture', upload.single('profile_picture'), (req, res) => {
 // GET /api/member/id-card
 // Download membership ID card as PDF
 // ============================================================
-router.get('/id-card', (req, res) => {
+router.get('/id-card', async (req, res) => {
     try {
-        const db = getDatabase();
-        const member = db.prepare(
-            'SELECT * FROM members WHERE member_id = ?'
-        ).get(req.session.memberId);
+        const { data: member, error } = await supabase
+            .from('members')
+            .select('*')
+            .eq('member_id', req.session.memberId)
+            .maybeSingle();
 
-        if (!member) {
+        if (error || !member) {
             return res.status(404).json({
                 success: false,
                 message: 'Member not found.'
@@ -216,7 +224,7 @@ router.get('/id-card', (req, res) => {
         // Generate and stream the PDF
         generateIdCard(member, res);
 
-        console.log(`[MEMBER] ID card downloaded: ${member.member_id}`);
+        console.log(`[MEMBER] ID card downloaded from Supabase data: ${member.member_id}`);
     } catch (error) {
         console.error('[MEMBER] ID card generation error:', error);
         res.status(500).json({
@@ -228,7 +236,7 @@ router.get('/id-card', (req, res) => {
 
 // ============================================================
 // PUT /api/member/settings
-// Update settings (password change)
+// Update password in Supabase
 // ============================================================
 router.put('/settings', async (req, res) => {
     try {
@@ -248,12 +256,13 @@ router.put('/settings', async (req, res) => {
             });
         }
 
-        const db = getDatabase();
-        const member = db.prepare(
-            'SELECT password FROM members WHERE member_id = ?'
-        ).get(req.session.memberId);
+        const { data: member, error: findError } = await supabase
+            .from('members')
+            .select('password')
+            .eq('member_id', req.session.memberId)
+            .maybeSingle();
 
-        if (!member) {
+        if (findError || !member) {
             return res.status(404).json({
                 success: false,
                 message: 'Member not found.'
@@ -269,13 +278,21 @@ router.put('/settings', async (req, res) => {
             });
         }
 
-        // Hash new password and update
+        // Hash new password and update in Supabase
         const hashedPassword = await bcrypt.hash(new_password, 10);
-        db.prepare(
-            'UPDATE members SET password = ? WHERE member_id = ?'
-        ).run(hashedPassword, req.session.memberId);
+        const { error: updateError } = await supabase
+            .from('members')
+            .update({ password: hashedPassword })
+            .eq('member_id', req.session.memberId);
 
-        console.log(`[MEMBER] Password changed: ${req.session.memberId}`);
+        if (updateError) {
+            return res.status(500).json({
+                success: false,
+                message: 'Error updating password in database.'
+            });
+        }
+
+        console.log(`[MEMBER] Password changed in Supabase: ${req.session.memberId}`);
 
         res.json({
             success: true,
