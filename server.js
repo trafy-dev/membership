@@ -24,6 +24,9 @@ const memberRoutes = require('./routes/member');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy for secure HTTPS cookies behind Render reverse proxy
+app.set('trust proxy', 1);
+
 // ── Middleware ──
 
 // CORS — allow frontend on any origin during development
@@ -44,7 +47,7 @@ app.use('/uploads', express.static(uploadsDir));
 // Session configuration
 const isProd = process.env.NODE_ENV === 'production';
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || '281def6654ed95f6fc7f144763fbcab98bbd10581efe1d53a46ae9b427daea02',
     resave: false,
     saveUninitialized: false,
     cookie: {
