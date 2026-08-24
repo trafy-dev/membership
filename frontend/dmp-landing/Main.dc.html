@@ -1,0 +1,539 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Catamaran:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --bg:#08080a;
+      --bg-alt:#0d0b0d;
+      --panel:#111013;
+      --line:rgba(255,255,255,0.09);
+      --ink:#f3efe8;
+      --ink-dim:rgba(243,239,232,0.68);
+      --ink-faint:rgba(243,239,232,0.42);
+      --red:#c81e1e;
+      --red-bright:#ff4433;
+      --red-deep:#7a1212;
+      --gold:#e0ac47;
+      --blue:#1c4c8c;
+      --font-display:'Oswald', 'Arial Narrow', sans-serif;
+      --font-tamil:'Catamaran', 'Noto Sans Tamil', sans-serif;
+      --font-body:'Inter', system-ui, sans-serif;
+    }
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);}
+    a{color:var(--gold);text-decoration:none;}
+    a:hover{color:var(--red-bright);}
+    .wrap{max-width:1240px;margin:0 auto;padding:0 32px;}
+    .eyebrow{font-family:var(--font-display);font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--red-bright);font-weight:600;}
+    .btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--red);color:#fff;font-family:var(--font-display);font-weight:600;font-size:14px;letter-spacing:.06em;text-transform:uppercase;padding:14px 30px;border-radius:4px;box-shadow:0 0 0 1px rgba(255,68,51,0.35), 0 12px 30px rgba(200,30,30,0.35);transition:all .25s ease;cursor:pointer;border:none;}
+    .btn-primary:hover{background:var(--red-bright);box-shadow:0 0 0 1px rgba(255,68,51,0.6), 0 16px 40px rgba(255,68,51,0.5);transform:translateY(-2px);}
+    .btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:transparent;color:var(--ink);font-family:var(--font-display);font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:12px 22px;border-radius:4px;border:1px solid var(--line);cursor:pointer;transition:all .2s ease;}
+    .btn-ghost:hover{border-color:var(--red-bright);color:var(--red-bright);}
+
+    /* NAVBAR */
+    .navbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:18px 32px;background:linear-gradient(180deg, rgba(8,8,10,0.85) 0%, rgba(8,8,10,0) 100%);backdrop-filter:blur(6px);}
+    .logo-badge{width:42px;height:42px;border-radius:50%;background:radial-gradient(circle at 35% 30%, var(--red-bright), var(--red-deep) 75%);display:flex;align-items:center;justify-content:center;font-family:var(--font-tamil);font-weight:800;font-size:15px;color:#fff;box-shadow:0 0 18px rgba(255,68,51,0.55), inset 0 0 0 1px rgba(255,255,255,0.15);flex-shrink:0;}
+    .brand-lockup{display:flex;align-items:center;gap:12px;}
+    .brand-name{font-family:var(--font-tamil);font-weight:700;font-size:17px;color:var(--ink);letter-spacing:.01em;line-height:1.1;}
+    .brand-sub{font-family:var(--font-display);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);}
+
+    /* HERO */
+    .hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:
+      radial-gradient(ellipse 70% 45% at 50% 8%, rgba(255,120,70,0.12) 0%, rgba(255,68,51,0) 60%),
+      linear-gradient(180deg, #030204 0%, #06040a 42%, #0a0508 78%, #120608 100%);}
+    .hero-stars{position:absolute;inset:0;pointer-events:none;opacity:.7;
+      background-image:
+        radial-gradient(1.4px 1.4px at 8% 15%, rgba(255,255,255,0.95), transparent 60%),
+        radial-gradient(1px 1px at 22% 42%, rgba(255,255,255,0.7), transparent 60%),
+        radial-gradient(1.6px 1.6px at 34% 8%, rgba(255,255,255,0.9), transparent 60%),
+        radial-gradient(1px 1px at 47% 63%, rgba(255,255,255,0.6), transparent 60%),
+        radial-gradient(1.3px 1.3px at 61% 22%, rgba(255,255,255,0.85), transparent 60%),
+        radial-gradient(1px 1px at 73% 48%, rgba(255,255,255,0.55), transparent 60%),
+        radial-gradient(1.5px 1.5px at 86% 12%, rgba(255,255,255,0.9), transparent 60%),
+        radial-gradient(1px 1px at 93% 55%, rgba(255,255,255,0.6), transparent 60%),
+        radial-gradient(1.2px 1.2px at 15% 78%, rgba(255,255,255,0.7), transparent 60%),
+        radial-gradient(1.4px 1.4px at 39% 88%, rgba(255,255,255,0.8), transparent 60%),
+        radial-gradient(1px 1px at 55% 92%, rgba(255,255,255,0.55), transparent 60%),
+        radial-gradient(1.3px 1.3px at 68% 80%, rgba(255,255,255,0.75), transparent 60%),
+        radial-gradient(1px 1px at 81% 90%, rgba(255,255,255,0.6), transparent 60%),
+        radial-gradient(1.2px 1.2px at 4% 55%, rgba(255,255,255,0.65), transparent 60%),
+        radial-gradient(1px 1px at 97% 32%, rgba(255,255,255,0.6), transparent 60%);
+      background-size:100% 100%;}
+    .aurora-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden;will-change:transform,opacity;}
+    .aurora-horizon{position:absolute;left:50%;bottom:-9vw;width:200vw;height:18vw;max-width:2200px;max-height:200px;transform:translateX(-50%);border-radius:50%;
+      background:linear-gradient(180deg, rgba(46,12,10,0.9) 0%, rgba(14,4,4,0.96) 45%, #050203 78%);
+      box-shadow:inset 0 14px 46px rgba(255,110,70,0.35);}
+    .aurora-glow-band{position:absolute;left:50%;bottom:4vw;width:72vw;height:15vw;max-width:840px;max-height:170px;transform:translateX(-50%);border-radius:50%;
+      background:radial-gradient(ellipse 60% 100% at 50% 60%, rgba(255,214,190,0.92) 0%, rgba(255,130,85,0.55) 30%, rgba(255,68,51,0.2) 56%, rgba(255,68,51,0) 80%);
+      filter:blur(14px);}
+    .beam{position:absolute;bottom:0;transform:translateX(-50%);border-radius:50% 50% 0 0;mix-blend-mode:screen;
+      background:radial-gradient(ellipse 55% 100% at 50% 100%, rgba(255,150,100,0.95) 0%, rgba(255,68,51,0.55) 26%, rgba(200,30,25,0.22) 52%, rgba(180,20,20,0) 78%);}
+    .hero-inner{position:relative;z-index:5;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 24px;}
+    .hero-title{font-family:var(--font-tamil);font-weight:800;color:#fff;font-size:52px;line-height:1.15;letter-spacing:.005em;text-shadow:0 0 40px rgba(255,90,60,0.55), 0 0 90px rgba(255,68,51,0.3);margin:0;}
+    .hero-rule{width:64px;height:3px;background:linear-gradient(90deg, transparent, var(--red-bright), transparent);margin:26px 0;}
+    .hero-tag{font-family:var(--font-display);font-weight:500;font-size:14.5px;letter-spacing:.05em;color:var(--ink-dim);max-width:520px;line-height:1.7;margin:0 0 38px;}
+    .scroll-cue{position:absolute;left:50%;bottom:34px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--ink-faint);font-family:var(--font-display);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;z-index:5;}
+
+    /* SECTION SHELL */
+    .section{position:relative;padding:110px 0;background:var(--bg);border-top:1px solid var(--line);}
+    .section-alt{background:var(--bg-alt);}
+    .section-head{max-width:640px;margin:0 auto 56px;text-align:center;}
+    .section-title{font-family:var(--font-display);font-weight:600;font-size:38px;color:#fff;margin:14px 0 0;letter-spacing:-.01em;}
+    .section-title .accent{color:var(--red-bright);}
+
+    /* VISION/MISSION */
+    .vm-section{padding:90px 0;}
+    .vm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+    .vm-cell{background:var(--panel);padding:44px 42px;}
+    .vm-cell h3{font-family:var(--font-display);font-weight:600;font-size:22px;color:var(--red-bright);margin:0 0 16px;letter-spacing:.02em;text-transform:uppercase;}
+    .vm-cell p{font-size:15.5px;line-height:1.8;color:var(--ink-dim);margin:0;}
+    @media (max-width:768px){.vm-grid{grid-template-columns:1fr;}}
+
+    /* THINKERS CARDS */
+    .thinkers-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px;}
+    .thinker-card{border-radius:10px;padding:38px 30px;border:1px solid var(--line);position:relative;overflow:hidden;transition:transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease;cursor:default;}
+    .thinker-card:hover{transform:translateY(-10px);}
+    .thinker-avatar{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:26px;color:#fff;margin-bottom:22px;box-shadow:0 10px 26px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.15);}
+    .thinker-name{font-family:var(--font-display);font-weight:600;font-size:19px;color:#fff;margin:0 0 4px;}
+    .thinker-role{font-size:12.5px;color:var(--ink-faint);letter-spacing:.03em;margin:0 0 16px;text-transform:uppercase;font-family:var(--font-display);}
+    .thinker-bio{font-size:14px;line-height:1.75;color:var(--ink-dim);margin:0;}
+    .thinker-marx{background:linear-gradient(160deg, #2b0a0a 0%, #1a0505 100%);}
+    .thinker-marx:hover{box-shadow:0 24px 50px rgba(200,30,30,0.35);border-color:rgba(255,68,51,0.4);}
+    .thinker-periyar{background:linear-gradient(160deg, #131313 0%, #050505 100%);}
+    .thinker-periyar:hover{box-shadow:0 24px 50px rgba(0,0,0,0.6);border-color:rgba(255,255,255,0.25);}
+    .thinker-ambedkar{background:linear-gradient(160deg, #0c1e38 0%, #060f1e 100%);}
+    .thinker-ambedkar:hover{box-shadow:0 24px 50px rgba(28,76,140,0.4);border-color:rgba(60,120,200,0.45);}
+    @media (max-width:900px){.thinkers-grid{grid-template-columns:1fr;}}
+
+    /* IDEOLOGY LEADERS */
+    .leaders-box{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel);}
+    .leaders-photos{width:30%;display:flex;flex-direction:column;border-right:1px solid var(--line);}
+    .leader-tab{display:flex;align-items:center;gap:16px;padding:26px 24px;cursor:pointer;border-bottom:1px solid var(--line);background:transparent;transition:background .2s ease;}
+    .leader-tab:hover{background:rgba(255,255,255,0.03);}
+    .leader-tab-active{background:linear-gradient(90deg, rgba(200,30,30,0.16), rgba(200,30,30,0.02));}
+    .leader-icon{width:56px;height:56px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:17px;color:#fff;background:radial-gradient(circle at 35% 30%, #6b1414, #2a0808);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);}
+    .leader-icon-active{background:radial-gradient(circle at 35% 30%, var(--red-bright), var(--red-deep));box-shadow:0 0 0 2px rgba(255,68,51,0.5), 0 0 18px rgba(255,68,51,0.4);}
+    .leader-tab-name{font-family:var(--font-display);font-weight:600;font-size:15px;color:var(--ink);}
+    .leader-tab-role{font-size:11.5px;color:var(--ink-faint);margin-top:3px;}
+    .leaders-desc{width:70%;padding:48px 52px;display:flex;flex-direction:column;justify-content:center;}
+    .leaders-desc .eyebrow{margin-bottom:10px;}
+    .leaders-desc h3{font-family:var(--font-display);font-weight:600;font-size:28px;color:#fff;margin:0 0 18px;}
+    .leaders-desc p{font-size:15px;line-height:1.85;color:var(--ink-dim);margin:0 0 18px;}
+    .event-tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-display);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(224,172,71,0.35);border-radius:999px;padding:8px 16px;margin-top:4px;}
+    @media (max-width:768px){.leaders-box{flex-direction:column;}.leaders-photos{width:100%;flex-direction:row;border-right:none;border-bottom:1px solid var(--line);}.leader-tab{flex-direction:column;text-align:center;flex:1;padding:18px 10px;border-bottom:none;border-right:1px solid var(--line);}.leader-tab:last-child{border-right:none;}.leaders-desc{width:100%;padding:34px 26px;}}
+
+    /* NOTE (FOUNDER/SECRETARY) */
+    .note-box{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel);}
+    .note-text{width:70%;padding:46px 50px;}
+    .note-text .eyebrow{margin-bottom:12px;}
+    .note-text h3{font-family:var(--font-display);font-weight:600;font-size:26px;color:#fff;margin:0 0 6px;}
+    .note-text .role{font-size:13px;color:var(--red-bright);font-family:var(--font-display);letter-spacing:.03em;margin-bottom:18px;}
+    .note-text p{font-size:15px;line-height:1.85;color:var(--ink-dim);margin:0 0 14px;}
+    .note-photo{width:30%;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg, #1a0808, #0a0405);border-left:1px solid var(--line);padding:30px;}
+    .note-avatar{width:150px;height:150px;border-radius:50%;background:radial-gradient(circle at 35% 30%, var(--red-bright), var(--red-deep) 80%);display:flex;align-items:center;justify-content:center;font-family:var(--font-tamil);font-weight:800;font-size:44px;color:#fff;box-shadow:0 0 0 6px rgba(255,255,255,0.04), 0 20px 50px rgba(200,30,30,0.4);}
+    @media (max-width:768px){.note-box{flex-direction:column;}.note-text{width:100%;padding:34px 26px;}.note-photo{width:100%;border-left:none;border-top:1px solid var(--line);padding:32px;}}
+
+    /* STATS */
+    .stats-section{padding:70px 0;background:linear-gradient(180deg, var(--bg-alt), var(--bg));border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+    .stats-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+    .stat-cell{background:var(--panel);padding:36px 24px;text-align:center;}
+    .stat-num{font-family:var(--font-display);font-weight:700;font-size:44px;color:var(--red-bright);text-shadow:0 0 30px rgba(255,68,51,0.4);}
+    .stat-label{font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-top:8px;font-family:var(--font-display);}
+    @media (max-width:768px){.stats-grid{grid-template-columns:1fr;}}
+
+    /* CLUBS */
+    .clubs-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;}
+    .club-card{border:1px solid var(--line);border-radius:10px;padding:28px 18px;text-align:center;background:var(--panel);transition:all .3s cubic-bezier(.22,1,.36,1);}
+    .club-card:hover{transform:translateY(-6px);border-color:rgba(255,68,51,0.4);box-shadow:0 16px 34px rgba(200,30,30,0.25);}
+    .club-icon{width:58px;height:58px;margin:0 auto 16px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg, rgba(200,30,30,0.18), rgba(200,30,30,0.04));border:1px solid rgba(255,68,51,0.25);}
+    .club-name{font-family:var(--font-display);font-weight:600;font-size:13.5px;color:var(--ink);line-height:1.4;}
+    @media (max-width:900px){.clubs-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+
+    /* CTA */
+    .cta-section{position:relative;padding:120px 0;text-align:center;overflow:hidden;background:radial-gradient(ellipse 100% 90% at 50% 100%, rgba(200,30,30,0.22), rgba(8,8,10,0) 65%), var(--bg-alt);}
+    .cta-inner{position:relative;z-index:2;max-width:680px;margin:0 auto;}
+    .cta-line{font-family:var(--font-display);font-weight:600;font-size:34px;color:#fff;line-height:1.3;margin:16px 0 20px;}
+    .cta-sub{font-size:15.5px;line-height:1.8;color:var(--ink-dim);margin:0 0 38px;}
+
+    /* FOOTER */
+    .footer{padding:56px 0 34px;border-top:1px solid var(--line);background:var(--bg);}
+    .footer-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:32px;margin-bottom:36px;}
+    .footer-cols{display:flex;gap:64px;flex-wrap:wrap;}
+    .footer-col h4{font-family:var(--font-display);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px;}
+    .footer-col a{display:block;font-size:13.5px;color:var(--ink-dim);margin-bottom:10px;}
+    .footer-bottom{padding-top:26px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12.5px;color:var(--ink-faint);}
+    @media (max-width:768px){.footer-top{flex-direction:column;}}
+
+    @media (max-width:768px){
+      .hero-title{font-size:34px;}
+      .aurora-horizon{width:280vw;height:24vw;bottom:-11vw;}
+      .beam{transform:translateX(-50%) scale(0.7);}
+      .section{padding:70px 0;}
+      .section-title{font-size:28px;}
+      .wrap{padding:0 20px;}
+    }
+  </style>
+</helmet>
+
+<div class="site">
+
+  <nav class="navbar">
+    <div class="logo-badge">DMP</div>
+    <button class="btn-primary" type="button">Join the Movement</button>
+  </nav>
+
+  <section class="hero" id="dmp-hero">
+    <div class="hero-stars"></div>
+    <div class="aurora-wrap" style="{{heroArcStyle}}">
+      <div class="aurora-horizon"></div>
+      <div class="beam" style="left:10%;width:64px;height:32vh;bottom:2vw;filter:blur(9px);"></div>
+      <div class="beam" style="left:23%;width:88px;height:48vh;bottom:4vw;filter:blur(8px);"></div>
+      <div class="beam" style="left:37%;width:76px;height:38vh;bottom:6vw;filter:blur(9px);"></div>
+      <div class="beam" style="left:50%;width:126px;height:64vh;bottom:9vw;filter:blur(7px);"></div>
+      <div class="beam" style="left:63%;width:80px;height:42vh;bottom:7vw;filter:blur(8px);"></div>
+      <div class="beam" style="left:77%;width:70px;height:30vh;bottom:4vw;filter:blur(9px);"></div>
+      <div class="beam" style="left:90%;width:58px;height:20vh;bottom:2vw;filter:blur(10px);"></div>
+      <div class="aurora-glow-band" style="{{heroGlowStyle}}"></div>
+    </div>
+    <div class="hero-inner">
+      <div class="eyebrow">Self-Respect &middot; Social Justice &middot; Student Power</div>
+      <h1 class="hero-title">திராவிட மாணவர் பேரவை</h1>
+      <div class="hero-rule"></div>
+      <p class="hero-tag">A student movement carrying forward the Dravidian ideal of equality, rationalism and dignity for every Tamil.</p>
+      <button class="btn-primary" type="button">Join the Movement</button>
+    </div>
+    <div class="scroll-cue">
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <section class="section vm-section section-alt">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Our Compass</div>
+        <h2 class="section-title">Vision &amp; <span class="accent">Mission</span></h2>
+      </div>
+      <div class="vm-grid">
+        <div class="vm-cell">
+          <h3>Vision</h3>
+          <p>A Tamil society free of caste, superstition and inherited privilege &mdash; where every student, regardless of birth or background, stands as an equal citizen with the same access to education, opportunity and self-respect.</p>
+        </div>
+        <div class="vm-cell">
+          <h3>Mission</h3>
+          <p>To organise, educate and mobilise Tamil students around the Dravidian principles of rationalism and social justice; to defend the language, land and rights of Tamils; and to build a new generation of fearless, questioning leaders.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="thinkers">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">The Foundations We Stand On</div>
+        <h2 class="section-title">Thinkers Who Shaped <span class="accent">Our Ideology</span></h2>
+      </div>
+      <div class="thinkers-grid">
+        <div class="thinker-card thinker-marx">
+          <div class="thinker-avatar" style="background:radial-gradient(circle at 35% 30%, #ff5a45, #7a1212 80%);">KM</div>
+          <h3 class="thinker-name">Karl Marx</h3>
+          <p class="thinker-role">Philosopher &amp; Economist</p>
+          <p class="thinker-bio">Exposed how capital concentrates wealth and power in the hands of a few. His call for a classless, equal society gave the world's working people a language to organise, resist and demand a fairer share of what they build.</p>
+        </div>
+        <div class="thinker-card thinker-periyar">
+          <div class="thinker-avatar" style="background:radial-gradient(circle at 35% 30%, #4a4a4a, #050505 80%);">EVR</div>
+          <h3 class="thinker-name">Periyar E. V. Ramasamy</h3>
+          <p class="thinker-role">Founder, Self-Respect Movement</p>
+          <p class="thinker-bio">Rejected caste, blind ritual and gender inequality across Tamil Nadu. He taught generations to question before believing, and built the Self-Respect Movement that remains the root of every Dravidian party today.</p>
+        </div>
+        <div class="thinker-card thinker-ambedkar">
+          <div class="thinker-avatar" style="background:radial-gradient(circle at 35% 30%, #3f7fd6, #0c1e38 80%);">BRA</div>
+          <h3 class="thinker-name">Dr. B. R. Ambedkar</h3>
+          <p class="thinker-role">Architect, Indian Constitution</p>
+          <p class="thinker-bio">Fought untouchability his entire life and wrote equality directly into India's founding law. His work on reservation, representation and constitutional rights remains the legal backbone of social justice in India.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-alt" id="ideology-leaders">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Carrying The Torch Forward</div>
+        <h2 class="section-title">Ideology <span class="accent">Leaders</span></h2>
+      </div>
+      <div class="leaders-box">
+        <div class="leaders-photos">
+          <sc-for list="{{leaderItems}}" as="item" hint-placeholder-count="3">
+            <div class="leader-tab {{item.tabClass}}" onClick="{{item.pick}}">
+              <div class="leader-icon {{item.iconClass}}">{{item.initials}}</div>
+              <div>
+                <div class="leader-tab-name">{{item.short}}</div>
+                <div class="leader-tab-role">{{item.years}}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div class="leaders-desc">
+          <div class="eyebrow">{{selected.years}}</div>
+          <h3>{{selected.name}}</h3>
+          <p>{{selected.bio}}</p>
+          <span class="event-tag">{{selected.event}}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="founding-note">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">In His Own Words</div>
+        <h2 class="section-title">Founding <span class="accent">Note</span></h2>
+      </div>
+      <div class="note-box">
+        <div class="note-text">
+          <div class="eyebrow">Founder</div>
+          <h3>Mr. Su. Pavee</h3>
+          <div class="role">Founder, Dravida Manavar Peravai</div>
+          <p>I started Dravida Manavar Peravai with a simple conviction: that Tamil students should never have to fight the same battles of caste and inequality that our elders fought without knowing where to turn.</p>
+          <p>We began as a handful of students meeting after college hours, and grew into a movement of gatherings, protests and clubs because young people were hungry for a space that took their questions seriously. Every protest we lead and every club we build carries the same self-respect ideology forward &mdash; for the next Tamil generation.</p>
+        </div>
+        <div class="note-photo">
+          <div class="note-avatar">SP</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-alt" id="secretary-note">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Leading From The Ground</div>
+        <h2 class="section-title">Secretary's <span class="accent">Note</span></h2>
+      </div>
+      <div class="note-box">
+        <div class="note-text">
+          <div class="eyebrow">Secretary</div>
+          <h3>Mr. Arul</h3>
+          <div class="role">Secretary, Dravida Manavar Peravai</div>
+          <p>My role is to make sure that every idea this movement believes in actually reaches the ground &mdash; every protest, every gathering, every club activity organised across Tamil Nadu.</p>
+          <p>Behind every number you see below is a team of student volunteers who show up early, stay late and never stop believing that organised, disciplined effort is how a movement becomes change. That discipline is what I work to protect every single day.</p>
+        </div>
+        <div class="note-photo">
+          <div class="note-avatar">A</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats-section">
+    <div class="wrap">
+      <div class="stats-grid">
+        <div class="stat-cell">
+          <div class="stat-num">8 Crore+</div>
+          <div class="stat-label">Lives Touched</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">600+</div>
+          <div class="stat-label">Protests Led</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">1500+</div>
+          <div class="stat-label">Gatherings Organised</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="clubs">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Where Members Take Action</div>
+        <h2 class="section-title">Our <span class="accent">Clubs</span></h2>
+      </div>
+      <div class="clubs-grid">
+        <div class="club-card">
+          <div class="club-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ff6b52" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12C12 12 5 12 5 5C12 5 12 12 12 12Z"/><path d="M12 12C12 12 19 12 19 5C12 5 12 12 12 12Z"/></svg>
+          </div>
+          <div class="club-name">Spread Green</div>
+        </div>
+        <div class="club-card">
+          <div class="club-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff6b52" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21C7 16.5 3 13 3 8.8C3 6.1 5.2 4 7.8 4C9.4 4 10.8 4.9 12 6.3C13.2 4.9 14.6 4 16.2 4C18.8 4 21 6.1 21 8.8C21 13 17 16.5 12 21Z"/></svg>
+          </div>
+          <div class="club-name">Go Red</div>
+        </div>
+        <div class="club-card">
+          <div class="club-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ff6b52" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18Z"/></svg>
+          </div>
+          <div class="club-name">Overseas Tamil Students Empowerment Club</div>
+        </div>
+        <div class="club-card">
+          <div class="club-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ff6b52" stroke-width="1.8" stroke-linecap="round"><path d="M3 18a9 9 0 0 1 18 0"/><path d="M6 18a6 6 0 0 1 12 0"/><path d="M9 18a3 3 0 0 1 6 0"/></svg>
+          </div>
+          <div class="club-name">REPUB Rainbows</div>
+        </div>
+        <div class="club-card">
+          <div class="club-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff6b52" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M4 6l8-3l8 3"/><path d="M4 6l-2 6a4 4 0 0 0 8 0z"/><path d="M16 6l-2 6a4 4 0 0 0 8 0z"/></svg>
+          </div>
+          <div class="club-name">De-Annihilation Club</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="wrap">
+      <div class="cta-inner">
+        <div class="eyebrow">Your Voice, Organised</div>
+        <p class="cta-line">Every Tamil student who stays silent is a voice the next generation won't get to hear.</p>
+        <p class="cta-sub">Caste doesn't end on its own, and rights aren't handed down &mdash; they're won by people who organise. Stand with thousands of students already building a more equal Tamil Nadu, one protest, one gathering, one conversation at a time.</p>
+        <button class="btn-primary" type="button">Join the Movement</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="brand-lockup">
+          <div class="logo-badge">DMP</div>
+          <div>
+            <div class="brand-name" style="font-size:15px;">திராவிட மாணவர் பேரவை</div>
+            <div class="brand-sub">Dravida Manavar Peravai</div>
+          </div>
+        </div>
+        <div class="footer-cols">
+          <div class="footer-col">
+            <h4>Movement</h4>
+            <a href="#thinkers">Ideology</a>
+            <a href="#ideology-leaders">Leaders</a>
+            <a href="#clubs">Clubs</a>
+          </div>
+          <div class="footer-col">
+            <h4>Leadership</h4>
+            <a href="#founding-note">Founder's Note</a>
+            <a href="#secretary-note">Secretary's Note</a>
+          </div>
+          <div class="footer-col">
+            <h4>Connect</h4>
+            <a href="#">Instagram</a>
+            <a href="#">YouTube</a>
+            <a href="#">Contact</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; Dravida Manavar Peravai. All rights reserved.</span>
+        <span>Self-Respect &middot; Social Justice &middot; Student Power</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { leaderId: 'anna', glow: 0 };
+    this._targetGlow = 0;
+    this._raf = null;
+    this._onScroll = null;
+  }
+  componentDidMount() {
+    this._onScroll = () => {
+      var hero = document.getElementById('dmp-hero');
+      if (!hero) return;
+      var rect = hero.getBoundingClientRect();
+      var vh = window.innerHeight || 800;
+      var p = (vh - rect.top) / (vh + rect.height);
+      if (p < 0) p = 0;
+      if (p > 1) p = 1;
+      this._targetGlow = p;
+    };
+    window.addEventListener('scroll', this._onScroll, { passive: true });
+    this._onScroll();
+    var self = this;
+    var tick = function () {
+      var cur = self.state.glow;
+      var next = cur + (self._targetGlow - cur) * 0.08;
+      self.setState({ glow: next });
+      self._raf = requestAnimationFrame(tick);
+    };
+    this._raf = requestAnimationFrame(tick);
+  }
+  componentWillUnmount() {
+    if (this._onScroll) window.removeEventListener('scroll', this._onScroll);
+    if (this._raf) cancelAnimationFrame(this._raf);
+  }
+  selectLeader(id) {
+    this.setState({ leaderId: id });
+  }
+  renderVals() {
+    var self = this;
+    var leaders = [
+      {
+        id: 'anna',
+        short: 'Anna',
+        name: 'C. N. Annadurai',
+        initials: 'CNA',
+        years: '1909 – 1969',
+        bio: 'Founded the DMK and became the first non-Congress Chief Minister in Tamil Nadu’s history, turning Periyar’s Self-Respect ideals into a governing party for the very first time. A gifted orator, he brought Tamil pride, rationalism and welfare-first politics into everyday governance.',
+        event: '1967 – Landmark Election Victory'
+      },
+      {
+        id: 'kalaignar',
+        short: 'Kalaignar',
+        name: 'M. Karunanidhi',
+        initials: 'MK',
+        years: '1924 – 2018',
+        bio: 'Five-time Chief Minister, writer and orator who carried Anna’s legacy forward for five decades. He championed federalism, reservation and welfare schemes, and led the historic anti-Hindi imposition agitation that protected Tamil’s place as a language of pride.',
+        event: 'Anti-Hindi Imposition Agitation'
+      },
+      {
+        id: 'stalin',
+        short: 'M. K. Stalin',
+        name: 'M. K. Stalin',
+        initials: 'MKS',
+        years: '1953 – Present',
+        bio: 'Current Chief Minister of Tamil Nadu, continuing the Dravidian model of governance into a new generation. He has pushed for a nationwide social justice census and greater state autonomy, and built youth-first welfare policy at the centre of his administration.',
+        event: 'Leading The Social Justice Census Demand'
+      }
+    ];
+    var selected = leaders[0];
+    for (var i = 0; i < leaders.length; i++) {
+      if (leaders[i].id === this.state.leaderId) { selected = leaders[i]; break; }
+    }
+    var leaderItems = leaders.map(function (l) {
+      var active = l.id === self.state.leaderId;
+      return {
+        id: l.id,
+        short: l.short,
+        years: l.years,
+        initials: l.initials,
+        tabClass: active ? 'leader-tab-active' : '',
+        iconClass: active ? 'leader-icon-active' : '',
+        pick: function () { self.selectLeader(l.id); }
+      };
+    });
+    var glow = this.state.glow;
+    var heroGlowStyle = 'transform: translate3d(0, ' + (-glow * 90).toFixed(1) + 'px, 0); opacity: ' + (0.5 + glow * 0.5).toFixed(3) + ';';
+    var heroArcStyle = 'transform: translate3d(-50%, ' + (glow * 70).toFixed(1) + 'px, 0); opacity: ' + (0.55 + glow * 0.45).toFixed(3) + ';';
+    return { leaderItems: leaderItems, selected: selected, heroGlowStyle: heroGlowStyle, heroArcStyle: heroArcStyle };
+  }
+}
+</script>
+</body>
+</html>

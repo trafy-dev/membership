@@ -1,0 +1,21 @@
+{
+  "name": "membership-backend",
+  "version": "1.0.0",
+  "description": "Membership management backend with signup, login, profile dashboard, and PDF ID card generation",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.4",
+    "bcrypt": "^5.1.1",
+    "better-sqlite3": "^11.7.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.21.1",
+    "express-session": "^1.18.1",
+    "multer": "^1.4.5-lts.1",
+    "pdfkit": "^0.15.1"
+  }
+}

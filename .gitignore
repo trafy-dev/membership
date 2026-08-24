@@ -1,0 +1,27 @@
+# Node modules
+node_modules/
+frontend/node_modules/
+
+# Environment files
+.env
+.env.local
+frontend/.env
+frontend/.env.local
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# Build outputs
+frontend/dist/
+
+# Uploads
+uploads/*
+!uploads/.gitkeep
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
