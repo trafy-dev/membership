@@ -5,239 +5,293 @@ const fs = require('fs');
 // Paths
 const LOGO_PATH = path.join(__dirname, '..', 'logo.jpg');
 
-// Color palette — dark black + red accent
-const COLORS = {
-    background: '#0A0A0A',
-    cardBg: '#141414',
-    accent: '#E63946',
-    accentDark: '#B71C2C',
+// Design Tokens & Colors
+const PALETTE = {
+    cardBg: '#0F0F12',
+    cardSurface: '#16161C',
+    primaryRed: '#B30000',
+    brightRed: '#E60000',
+    deepRed: '#590000',
+    gold: '#D4AF37',
+    goldLight: '#F3E5AB',
     white: '#FFFFFF',
-    lightGray: '#CCCCCC',
-    dimGray: '#888888',
-    border: '#2A2A2A'
+    textMuted: '#9E9EA7',
+    textFaint: '#62626D',
+    border: '#272732',
+    pillBg: 'rgba(230, 0, 0, 0.15)'
 };
 
 /**
- * Generate a student-style vertical membership ID card PDF.
- * Streams directly to the response object — no temp file.
- *
- * Layout:
- * ┌─────────────────────────────┐
- * │       ORG LOGO (image)      │
- * │   ── red accent line ──     │
- * │      [Member Photo]         │
- * │       MEMBER NAME           │
- * │       Member ID             │
- * │   ── red accent line ──     │
- * │   Address | Contact | Blood │
- * │   ── red accent line ──     │
- * │        Footer               │
- * └─────────────────────────────┘
+ * Senior UI/UX Professional Membership ID Card Generator
+ * Inspired by modern executive and student identity credentials
  */
 function generateIdCard(member, outputStream) {
-    // Card dimensions (pts) — vertical card, ~3.5in x 5.5in
-    const cardWidth = 252;
-    const cardHeight = 396;
+    const cardWidth = 260;
+    const cardHeight = 420;
+    const margin = 10;
+    const cardRadius = 14;
 
     const doc = new PDFDocument({
         size: [cardWidth, cardHeight],
         margins: { top: 0, bottom: 0, left: 0, right: 0 },
         info: {
-            Title: `Membership ID Card - ${member.name}`,
+            Title: `Membership Card - ${member.name}`,
             Author: 'Dravida Maanavar Peravai',
             Subject: `Member ID: ${member.member_id}`
         }
     });
 
-    // Pipe to response stream
     doc.pipe(outputStream);
 
-    // ── Background ──
-    doc.rect(0, 0, cardWidth, cardHeight).fill(COLORS.background);
+    // ── 1. Card Base Container ──
+    doc.roundedRect(margin, margin, cardWidth - margin * 2, cardHeight - margin * 2, cardRadius)
+        .fill(PALETTE.cardBg);
 
-    // ── Inner card with subtle border ──
-    const margin = 6;
-    const innerW = cardWidth - margin * 2;
-    const innerH = cardHeight - margin * 2;
-    doc.roundedRect(margin, margin, innerW, innerH, 8)
+    // Outer subtle border
+    doc.roundedRect(margin, margin, cardWidth - margin * 2, cardHeight - margin * 2, cardRadius)
         .lineWidth(1)
-        .strokeColor(COLORS.accent)
-        .fillAndStroke(COLORS.cardBg, COLORS.accent);
-
-    let currentY = margin + 10;
-
-    // ── Organization Logo ──
-    if (fs.existsSync(LOGO_PATH)) {
-        const logoWidth = 70;
-        const logoHeight = 70;
-        const logoX = (cardWidth - logoWidth) / 2;
-        doc.image(LOGO_PATH, logoX, currentY, {
-            width: logoWidth,
-            height: logoHeight,
-            fit: [logoWidth, logoHeight],
-            align: 'center',
-            valign: 'center'
-        });
-        currentY += logoHeight + 6;
-    } else {
-        // Fallback text if logo file not found
-        doc.fontSize(8)
-            .fillColor(COLORS.accent)
-            .text('DRAVIDA MAANAVAR PERAVAI', margin + 10, currentY, {
-                width: innerW - 20,
-                align: 'center'
-            });
-        currentY += 20;
-    }
-
-    // ── Title ──
-    doc.fontSize(7)
-        .fillColor(COLORS.accent)
-        .text('MEMBERSHIP CARD', margin + 10, currentY, {
-            width: innerW - 20,
-            align: 'center'
-        });
-    currentY += 14;
-
-    // ── Red accent line ──
-    drawAccentLine(doc, margin + 15, currentY, cardWidth - margin - 15);
-    currentY += 8;
-
-    // ── Member Photo ──
-    const photoSize = 80;
-    const photoX = (cardWidth - photoSize) / 2;
-
-    // Photo border (red)
-    doc.roundedRect(photoX - 2, currentY - 2, photoSize + 4, photoSize + 4, 4)
-        .lineWidth(1.5)
-        .strokeColor(COLORS.accent)
+        .strokeColor(PALETTE.border)
         .stroke();
 
-    // Embed member photo
+    // ── 2. Top Header Wave (Curved Architectural Crest) ──
+    const headerH = 105;
+    doc.save();
+    // Clip to rounded card bounds
+    doc.roundedRect(margin, margin, cardWidth - margin * 2, cardHeight - margin * 2, cardRadius).clip();
+
+    // Top background gradient / block
+    doc.rect(margin, margin, cardWidth - margin * 2, headerH).fill(PALETTE.deepRed);
+
+    // Primary Crimson Dynamic Arc
+    doc.path(`M ${margin} ${margin} L ${cardWidth - margin} ${margin} L ${cardWidth - margin} ${headerH - 20} Q ${cardWidth / 2} ${headerH + 25} ${margin} ${headerH - 20} Z`)
+        .fill(PALETTE.primaryRed);
+
+    // Gold Accent Wave Rib
+    doc.path(`M ${margin} ${headerH - 18} Q ${cardWidth / 2} ${headerH + 28} ${cardWidth - margin} ${headerH - 18} L ${cardWidth - margin} ${headerH - 14} Q ${cardWidth / 2} ${headerH + 32} ${margin} ${headerH - 14} Z`)
+        .fill(PALETTE.gold);
+
+    // Organization Logo Badge (Clean circular pill)
+    const logoSize = 48;
+    const logoX = (cardWidth - logoSize) / 2;
+    const logoY = margin + 10;
+
+    doc.circle(cardWidth / 2, logoY + logoSize / 2, (logoSize / 2) + 3)
+        .fill(PALETTE.white);
+
+    if (fs.existsSync(LOGO_PATH)) {
+        try {
+            doc.save();
+            doc.circle(cardWidth / 2, logoY + logoSize / 2, logoSize / 2).clip();
+            doc.image(LOGO_PATH, logoX, logoY, {
+                width: logoSize,
+                height: logoSize,
+                fit: [logoSize, logoSize],
+                align: 'center',
+                valign: 'center'
+            });
+            doc.restore();
+        } catch (e) {
+            console.error('[PDF] Logo load exception:', e.message);
+        }
+    }
+
+    doc.circle(cardWidth / 2, logoY + logoSize / 2, (logoSize / 2) + 3)
+        .lineWidth(1.5)
+        .strokeColor(PALETTE.gold)
+        .stroke();
+
+    // Header Title
+    doc.fontSize(7.5)
+        .font('Helvetica-Bold')
+        .fillColor(PALETTE.white)
+        .text('DRAVIDA MAANAVAR PERAVAI', margin, logoY + logoSize + 6, {
+            width: cardWidth - margin * 2,
+            align: 'center',
+            characterSpacing: 0.8
+        });
+
+    doc.restore(); // Restore clip
+
+    // ── 3. Member Photo (Centered Floating Badge with Ring) ──
+    const photoSize = 74;
+    const photoY = headerH - 8;
+    const photoCenterX = cardWidth / 2;
+    const photoCenterY = photoY + photoSize / 2;
+
+    // Outer Glow & Gold Ring
+    doc.circle(photoCenterX, photoCenterY, (photoSize / 2) + 4)
+        .lineWidth(2.5)
+        .strokeColor(PALETTE.gold)
+        .fill(PALETTE.cardSurface);
+
+    // Inner White Ring
+    doc.circle(photoCenterX, photoCenterY, (photoSize / 2) + 1.5)
+        .lineWidth(1.5)
+        .strokeColor(PALETTE.white)
+        .stroke();
+
+    // Embed Member Photo
     const profilePicPath = path.join(__dirname, '..', member.profile_picture || '');
     let photoLoaded = false;
+
     if (member.profile_picture && fs.existsSync(profilePicPath)) {
         try {
-            doc.image(profilePicPath, photoX, currentY, {
+            doc.save();
+            doc.circle(photoCenterX, photoCenterY, photoSize / 2).clip();
+            doc.image(profilePicPath, photoCenterX - photoSize / 2, photoY, {
                 width: photoSize,
                 height: photoSize,
                 fit: [photoSize, photoSize],
                 align: 'center',
                 valign: 'center'
             });
+            doc.restore();
             photoLoaded = true;
-        } catch (imgErr) {
-            console.error('[PDF] Could not embed member photo:', imgErr.message);
+        } catch (err) {
+            console.error('[PDF] Member photo embed error:', err.message);
         }
     }
+
     if (!photoLoaded) {
-        // Placeholder if no photo or load failed
-        doc.roundedRect(photoX, currentY, photoSize, photoSize, 3)
-            .fill(COLORS.border);
+        doc.circle(photoCenterX, photoCenterY, photoSize / 2).fill(PALETTE.border);
         doc.fontSize(7)
-            .fillColor(COLORS.dimGray)
-            .text('NO PHOTO', photoX, currentY + 35, {
+            .font('Helvetica-Bold')
+            .fillColor(PALETTE.textMuted)
+            .text('NO PHOTO', photoCenterX - photoSize / 2, photoCenterY - 4, {
                 width: photoSize,
                 align: 'center'
             });
     }
-    currentY += photoSize + 10;
 
-    // ── Member Name (bold, large) ──
+    // ── 4. Member Name & Role Pill ──
+    let cursorY = photoY + photoSize + 10;
+
     doc.fontSize(12)
-        .fillColor(COLORS.white)
-        .text(member.name.toUpperCase(), margin + 10, currentY, {
-            width: innerW - 20,
-            align: 'center'
+        .font('Helvetica-Bold')
+        .fillColor(PALETTE.white)
+        .text((member.name || 'MEMBER NAME').toUpperCase(), margin, cursorY, {
+            width: cardWidth - margin * 2,
+            align: 'center',
+            characterSpacing: 0.5
         });
-    currentY += 18;
 
-    // ── Member ID ──
-    doc.fontSize(8)
-        .fillColor(COLORS.accent)
-        .text(member.member_id, margin + 10, currentY, {
-            width: innerW - 20,
-            align: 'center'
+    cursorY += 15;
+
+    // Role Tag Pill (e.g. "STUDENT MEMBER" or "ACTIVE MEMBER")
+    const roleText = member.is_student ? 'STUDENT MEMBER' : (member.profession || 'OFFICIAL MEMBER').toUpperCase();
+    const pillW = Math.min(130, doc.widthOfString(roleText) + 20);
+    const pillH = 14;
+    const pillX = (cardWidth - pillW) / 2;
+
+    doc.roundedRect(pillX, cursorY, pillW, pillH, 7)
+        .fill(PALETTE.primaryRed);
+
+    doc.fontSize(6.5)
+        .font('Helvetica-Bold')
+        .fillColor(PALETTE.white)
+        .text(roleText, pillX, cursorY + 3.5, {
+            width: pillW,
+            align: 'center',
+            characterSpacing: 0.4
         });
-    currentY += 14;
 
-    // ── Red accent line ──
-    drawAccentLine(doc, margin + 15, currentY, cardWidth - margin - 15);
-    currentY += 10;
+    cursorY += pillH + 12;
 
-    // ── Details section ──
-    const detailX = margin + 18;
-    const detailWidth = innerW - 36;
-    const lineHeight = 14;
+    // ── 5. Member Information Data Grid (Clean Two-Column Alignment) ──
+    const gridX = margin + 16;
+    const gridW = cardWidth - (margin + 16) * 2;
+    const labelW = 68;
+    const valueW = gridW - labelW - 10;
+    const rowGap = 13;
 
-    // Address
-    if (member.address) {
-        drawDetailRow(doc, 'ADDRESS', member.address, detailX, currentY, detailWidth);
-        currentY += lineHeight;
+    // Background Cardlet for Data
+    const dataBoxH = 88;
+    doc.roundedRect(gridX - 8, cursorY - 4, gridW + 16, dataBoxH, 6)
+        .lineWidth(1)
+        .strokeColor(PALETTE.border)
+        .fillAndStroke(PALETTE.cardSurface, PALETTE.border);
+
+    const drawGridRow = (label, value, isHighlight = false) => {
+        if (!value) return;
+
+        // Label
+        doc.fontSize(6.5)
+            .font('Helvetica-Bold')
+            .fillColor(PALETTE.textFaint)
+            .text(label.toUpperCase(), gridX, cursorY, { width: labelW });
+
+        // Separator Colon
+        doc.fontSize(6.5)
+            .font('Helvetica-Bold')
+            .fillColor(PALETTE.textFaint)
+            .text(':', gridX + labelW - 6, cursorY);
+
+        // Value
+        doc.fontSize(7.5)
+            .font(isHighlight ? 'Helvetica-Bold' : 'Helvetica')
+            .fillColor(isHighlight ? PALETTE.brightRed : PALETTE.white)
+            .text(value, gridX + labelW + 4, cursorY - 0.5, {
+                width: valueW,
+                ellipsis: true
+            });
+
+        cursorY += rowGap;
+    };
+
+    drawGridRow('Member ID', member.member_id, true);
+    drawGridRow('Blood Group', member.blood_group || 'N/A', false);
+    drawGridRow('Contact', member.contact_number || 'N/A', false);
+    
+    if (member.is_student && member.institution_name) {
+        drawGridRow('Institution', member.institution_name, false);
+    } else if (member.city || member.district) {
+        drawGridRow('Location', [member.city, member.district, member.state].filter(Boolean).slice(0, 2).join(', '), false);
+    } else if (member.address) {
+        drawGridRow('Address', member.address, false);
     }
 
-    // Contact Number
-    if (member.contact_number) {
-        drawDetailRow(doc, 'CONTACT', member.contact_number, detailX, currentY, detailWidth);
-        currentY += lineHeight;
-    }
+    // ── 6. Barcode & Security Strip Area ──
+    const footerY = cardHeight - margin - 42;
 
-    // Blood Group
-    if (member.blood_group) {
-        drawDetailRow(doc, 'BLOOD GROUP', member.blood_group, detailX, currentY, detailWidth);
-        currentY += lineHeight;
-    }
+    // Simulated Vector Barcode
+    drawVectorBarcode(doc, cardWidth / 2 - 60, footerY + 2, 120, 16, member.member_id);
 
-    // ── Footer accent line ──
-    const footerLineY = cardHeight - margin - 22;
-    drawAccentLine(doc, margin + 15, footerLineY, cardWidth - margin - 15);
-
-    // ── Footer ──
+    // Micro Footnote
     doc.fontSize(5)
-        .fillColor(COLORS.dimGray)
-        .text('DRAVIDA MAANAVAR PERAVAI', margin + 10, footerLineY + 5, {
-            width: innerW - 20,
-            align: 'center'
+        .font('Helvetica')
+        .fillColor(PALETTE.textFaint)
+        .text('OFFICIAL DIGITAL IDENTITY CREDENTIAL • SECURE VERIFIED', margin, footerY + 22, {
+            width: cardWidth - margin * 2,
+            align: 'center',
+            characterSpacing: 0.5
         });
 
-    doc.fontSize(4)
-        .fillColor(COLORS.dimGray)
-        .text('This card is property of the organization. If found, please return.', margin + 10, footerLineY + 12, {
-            width: innerW - 20,
-            align: 'center'
-        });
-
-    // Finalize
     doc.end();
 }
 
 /**
- * Draw a horizontal red accent line
+ * Draw a crisp modern simulated vector barcode
  */
-function drawAccentLine(doc, x1, y, x2) {
-    doc.moveTo(x1, y)
-        .lineTo(x2, y)
-        .lineWidth(1.5)
-        .strokeColor(COLORS.accent)
-        .stroke();
-}
+function drawVectorBarcode(doc, x, y, width, height, seedText = '') {
+    const seed = seedText.split('').reduce((acc, char) => acc + char.charCodeAt(0), 42);
+    let currentX = x;
+    const barCount = 38;
+    const barWidthUnit = width / (barCount * 1.6);
 
-/**
- * Draw a detail row: LABEL: value
- */
-function drawDetailRow(doc, label, value, x, y, width) {
-    // Label
-    doc.fontSize(5.5)
-        .fillColor(COLORS.accent)
-        .text(label, x, y, { continued: false });
+    doc.save();
+    for (let i = 0; i < barCount; i++) {
+        const isThick = ((seed * (i + 7)) % 5) === 0;
+        const w = isThick ? barWidthUnit * 1.8 : barWidthUnit * 0.9;
+        const skip = ((seed * (i + 3)) % 7) === 0;
 
-    // Value
-    doc.fontSize(7)
-        .fillColor(COLORS.white)
-        .text(value, x, y + 5.5, {
-            width: width,
-            ellipsis: true
-        });
+        if (!skip) {
+            doc.rect(currentX, y, w, height)
+                .fill(PALETTE.white);
+        }
+        currentX += w + barWidthUnit * 0.7;
+        if (currentX >= x + width) break;
+    }
+    doc.restore();
 }
 
 module.exports = { generateIdCard };
