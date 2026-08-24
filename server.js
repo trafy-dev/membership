@@ -42,12 +42,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(uploadsDir));
 
 // Session configuration
+const isProd = process.env.NODE_ENV === 'production';
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'membership-secret-key-change-in-production',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false, // Set to true in production with HTTPS
+        secure: isProd, 
+        sameSite: isProd ? 'none' : 'lax',
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
